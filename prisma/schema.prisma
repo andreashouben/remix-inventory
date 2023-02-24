@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Container {
+  id Int @id @default(autoincrement())
+  name String
+  parentContainerId Int?
+  parentContainer Container? @relation("ContainerContains", fields: [parentContainerId], references: [id])
+  containers Container[] @relation("ContainerContains")
+  items Item[]
+}
+
+model Item {
+  id Int @id @default(autoincrement())
+  name String
+  container Container @relation(fields: [containerId], references: [id])
+  containerId Int
+}
+
