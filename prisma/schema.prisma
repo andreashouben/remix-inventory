@@ -11,18 +11,26 @@ datasource db {
 }
 
 model Container {
-  id Int @id @default(autoincrement())
-  name String
+  id                Int         @id @default(autoincrement())
+  name              String
   parentContainerId Int?
-  parentContainer Container? @relation("ContainerContains", fields: [parentContainerId], references: [id])
-  containers Container[] @relation("ContainerContains")
-  items Item[]
+  parentContainer   Container?  @relation("ContainerContains", fields: [parentContainerId], references: [id])
+  containers        Container[] @relation("ContainerContains")
+  items             Item[]
 }
 
 model Item {
-  id Int @id @default(autoincrement())
-  name String
-  container Container @relation(fields: [containerId], references: [id])
+  id          Int       @id @default(autoincrement())
+  name        String
+  amount      Int       @default(0)
+  unit        Unit      @relation(references: [id], fields: [unitId])
+  unitId      Int
+  container   Container @relation(fields: [containerId], references: [id])
   containerId Int
 }
 
+model Unit {
+  id   Int    @id @default(autoincrement())
+  name String
+  item Item[]
+}

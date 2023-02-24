@@ -1,4 +1,5 @@
 import { db } from "~/utils/db.server";
+import type { Container as ContainerFromDb } from ".prisma/client";
 
 export const containerService = {
   async getContainer(id: number) {
@@ -17,7 +18,7 @@ export const containerService = {
     }
     return container;
   },
-  async getContainersForParent(parentContainerId: number) {
+  async getContainersForParent(parentContainerId: number | null) {
     return db.container.findMany({
       where: {
         parentContainerId,
@@ -29,11 +30,25 @@ export const containerService = {
       },
     });
   },
-  async getItems(containerId: number) {
+  async getItemsInContainer(containerId: number) {
     return db.item.findMany({
       where: {
         containerId,
       },
+      include: {
+        unit: true,
+      },
     });
+  },
+  async fetchParentContainers(
+    parent: ContainerFromDb | null,
+    parents: ContainerFromDb[]
+  ): Promise<ContainerFromDb[]> {
+    if (parent === null) {
+      return parents;
+    }
+    parents.push(parent);
+    const container = await containerService.getContainer(parent.id);
+    return await this.fetchParentContainers(container.parentContainer, parents);
   },
 };

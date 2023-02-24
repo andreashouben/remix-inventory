@@ -1,86 +1,84 @@
-import { Form, Outlet, useLoaderData } from "@remix-run/react";
+import { itemService } from "~/service/itemService";
+import { containerService } from "~/service/containerService";
+import { unitService } from "~/service/unitService";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { containerService } from "~/service/containerService";
-import { db } from "~/utils/db.server";
+import { Form, useLoaderData } from "@remix-run/react";
 import { CheckIcon } from "@heroicons/react/20/solid";
-import { unitService } from "~/service/unitService";
-import type { KeyboardEvent } from "react";
-import { useEffect } from "react";
+import { am } from "vitest/dist/global-58e8e951";
 
 type LoaderData = {
+  item: Awaited<ReturnType<typeof itemService.findItem>>;
   container: Awaited<ReturnType<typeof containerService.getContainer>>;
   units: Awaited<ReturnType<typeof unitService.getUnits>>;
 };
 export const loader: LoaderFunction = async ({ params }) => {
-  const container = await containerService.getContainer(
-    parseInt(params.containerId!)
-  );
+  const itemId = parseInt(params.itemId!);
+  const item = await itemService.findItem(itemId);
+  const container = await containerService.getContainer(item.containerId);
   const units = await unitService.getUnits();
-  return json<LoaderData>({ container, units });
+
+  return json({ item, container, units });
 };
 
-export const action: ActionFunction = async ({ request, params }) => {
-  const containerId = params.containerId;
-  if (!containerId) {
-    throw new Response(`Container id ${containerId} not found`, {
-      status: 404,
-    });
-  }
-  const { itemName, unitId, amount } = Object.fromEntries(
+export const action: ActionFunction = async ({ params, request }) => {
+  const itemId = parseInt(params.itemId!);
+  const { itemName, amount, unitId } = Object.fromEntries(
     await request.formData()
   );
 
   if (
     typeof itemName !== "string" ||
-    typeof unitId !== "string" ||
-    typeof amount !== "string"
+    typeof amount !== "string" ||
+    typeof unitId !== "string"
   ) {
-    throw new Error("Form not submitted correctly.");
+    throw new Error("Invalid Form Data");
   }
-  const unitIdInt = parseInt(unitId);
-  const amountInt = parseInt(amount);
 
-  await db.item.create({
-    data: {
-      name: itemName,
-      unitId: unitIdInt,
-      amount: amountInt,
-      containerId: parseInt(containerId),
-    },
+  const item = await itemService.udateItem({
+    id: itemId,
+    amount: parseInt(amount),
+    unitId: parseInt(unitId),
+    name: itemName,
   });
-  return redirect(`/container/${containerId}`);
+
+  return redirect(`/container/${item.containerId}`);
 };
 
-export default function AddItem() {
-  const { container, units } = useLoaderData() as LoaderData;
-
+export default function EditItem() {
+  const { item, container, units } = useLoaderData() as LoaderData;
   return (
     <>
-      <h2>{`Add Item to Container '${container.name}'`}</h2>
+      <h2>{`Edit Item in '${container.name}'`}</h2>
 
       <Form method="post" className="form-control">
         <label className="input-group pb-3">
           <span className="w-2/12">Item Name</span>
           <input
+            required
             placeholder={"Item Name"}
             className="input-bordered input w-10/12"
             type="text"
             name={"itemName"}
+            defaultValue={item.name}
             autoFocus
-            required
           />
         </label>
         <label className="input-group pb-3">
           <span className="w-2/12">Amount</span>
           <input
+            required
             placeholder={"Amount"}
             className="input-bordered input w-8/12"
             type="number"
+            defaultValue={item.amount}
             name={"amount"}
-            required
           />
-          <select className="select-bordered select w-2/12" name="unitId">
+          <select
+            className="select-bordered select w-2/12"
+            name="unitId"
+            defaultValue={item.unitId}
+          >
             {units.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.name}

@@ -1,33 +1,24 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { db } from "~/utils/db.server";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, Outlet, useLoaderData, useNavigate } from "@remix-run/react";
 import type { Container as ContainerFromDb } from "@prisma/client";
-import { Button } from "~/components/button/button";
-import { containerService } from "~/routes/container/containerService";
-import { Container } from "~/components/container/container";
-import React from "react";
+import { IconButton } from "~/components/button/iconButton";
+import { containerService } from "~/service/containerService";
+import React, { useEffect } from "react";
+import { ArchiveBoxArrowDownIcon } from "@heroicons/react/24/outline";
+import { FolderPlusIcon } from "@heroicons/react/20/solid";
+import { ContainerNavigation } from "~/components/containerNavigation/containerNavigation";
+import { ContainerList } from "~/components/container/containerList";
+import { ItemsTable } from "~/components/items/itemsTable";
 
 type LoaderData = {
   container: Awaited<ReturnType<typeof containerService.getContainer>>;
   containers: Awaited<
     ReturnType<typeof containerService.getContainersForParent>
   >;
-  items: Awaited<ReturnType<typeof containerService.getItems>>;
+  items: Awaited<ReturnType<typeof containerService.getItemsInContainer>>;
   parents: ContainerFromDb[];
-};
-
-const fetchParent = async (
-  parent: ContainerFromDb | null,
-  names: ContainerFromDb[]
-): Promise<ContainerFromDb[]> => {
-  if (parent === null) {
-    return names;
-  }
-  names.push(parent);
-  const container = await containerService.getContainer(parent.id);
-
-  return await fetchParent(container.parentContainer, names);
 };
 
 export const loader: LoaderFunction = async ({ params }) => {
@@ -38,17 +29,22 @@ export const loader: LoaderFunction = async ({ params }) => {
     container.id
   );
 
-  const parents = (await fetchParent(container.parentContainer, [])).sort(
-    (a, b) => (a.name > b.name ? 1 : -1)
+  const parents = await containerService.fetchParentContainers(
+    container.parentContainer,
+    []
   );
-  const items = await containerService.getItems(container.id);
+  parents.sort((a, b) => (a.name > b.name ? 1 : -1));
+
+  const items = await containerService.getItemsInContainer(container.id);
 
   return json<LoaderData>({ container, items, containers, parents });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
   const containerId = parseInt(params.containerId!);
-  if (request.method === "DELETE") {
+  const formData = await request.formData();
+  const { _action } = Object.fromEntries(formData);
+  if (_action === "delete") {
     await db.item.deleteMany({
       where: {
         containerId,
@@ -65,50 +61,48 @@ export const action: ActionFunction = async ({ request, params }) => {
 export default function ContainerPage() {
   const { parents, container, items, containers } =
     useLoaderData() as LoaderData;
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const onKeypress = (e: KeyboardEvent) => {
+      if (e.key.toLocaleLowerCase() === "i") {
+        navigate(`/container/addItem/${container.id}`);
+      }
+      if (e.key.toLocaleLowerCase() === "c") {
+        navigate(`/container/addContainer/${container.id}`);
+      }
+    };
+    window.document.addEventListener("keydown", onKeypress);
+    return () => {
+      window.document.removeEventListener("keydown", onKeypress);
+    };
+  }, [navigate, container]);
+
   return (
     <section>
-      <h2>
-        {parents.length > 0 &&
-          [...parents]
-            .map<React.ReactNode>((c) => (
-              <Link key={c.id} to={`/container/${c.id}`}>
-                {c.name}
-              </Link>
-            ))
-            .reduce((prev, cur) => [prev, <span> &gt; </span>, cur])}
-        {parents.length > 0 && " > "}
-        {container.name}
-      </h2>
-      <h3>Container</h3>
-      <ol>
-        {containers.map((c) => (
-          <li key={c.id}>
-            <Container
-              containerName={c.name}
-              containerId={c.id}
-              itemCount={c._count.items}
-              containerCount={c._count.containers}
-            />
-          </li>
-        ))}
-      </ol>
-      <h3>Items</h3>
-      <ol>
-        {items.map((i) => (
-          <li key={i.id}>{i.name}</li>
-        ))}
-      </ol>
-      <Link to={`/container/addItem/${container.id}`}>
-        <Button>Add Item</Button>
-      </Link>
-
-      <Link to={`/container/addContainer/${container.id}`}>
-        <Button>Add Container</Button>
-      </Link>
-
-      <Link to={"/"}>
-        <Button>Back to container list</Button>
-      </Link>
+      <header className="flex items-center justify-between">
+        <h2>Container "{container.name}"</h2>
+        <div>
+          <Link to={`/container/addContainer/${container.id}`}>
+            <button className="btn-primary btn-md btn gap-2">
+              <kbd className="kbd kbd-sm text-black">C</kbd>
+              Add Container
+            </button>
+          </Link>
+          <Link to={`/container/addItem/${container.id}`} className="pl-2">
+            <button className="btn-primary btn-md btn gap-2">
+              <kbd className="kbd kbd-sm text-black">I</kbd>
+              Add Item
+            </button>
+          </Link>
+        </div>
+      </header>
+      <nav className="inline">
+        <ContainerNavigation container={parents} />
+      </nav>
+      {containers.length > 0 && <ContainerList containers={containers} />}
+      {items.length > 0 && <ItemsTable items={items} />}
     </section>
   );
 }

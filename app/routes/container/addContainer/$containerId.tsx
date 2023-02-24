@@ -1,11 +1,13 @@
 import { Form, useLoaderData } from "@remix-run/react";
 import { Label } from "~/components/label/label";
 import { Input } from "~/components/input/input";
-import { Button } from "~/components/button/button";
+import { IconButton } from "~/components/button/iconButton";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { containerService } from "~/routes/container/containerService";
+import { containerService } from "~/service/containerService";
 import { db } from "~/utils/db.server";
+import { CheckIcon } from "@heroicons/react/20/solid";
+import { SubmitForm } from "~/components/forms/submitForm";
 
 type LoaderData = {
   container: Awaited<ReturnType<typeof containerService.getContainer>>;
@@ -38,20 +40,11 @@ export default function AddItem() {
 
   return (
     <section>
-      <h2>Add Container to Container '{container.name}'</h2>
-
-      <Form method="post" className="grid grid-cols-1 gap-2 text-center">
-        <fieldset>
-          <Label>
-            Container Name: <br />
-            <Input type="text" name="container-name" />
-          </Label>
-        </fieldset>
-
-        <div>
-          <Button>Submit</Button>
-        </div>
-      </Form>
+      <SubmitForm
+        title={`Add Container to Container '${container.name}'`}
+        placeholder="Container Name"
+        name="container-name"
+      />
     </section>
   );
 }

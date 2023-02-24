@@ -14,6 +14,9 @@
     "typecheck": "tsc -b",
     "validate": "run-p test lint typecheck check"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "prettier": {},
   "eslintIgnore": [
     "/node_modules",
@@ -21,11 +24,13 @@
     "/public/build"
   ],
   "dependencies": {
+    "@heroicons/react": "^2.0.16",
     "@prisma/client": "4.10.1",
     "@remix-run/node": "^1.13.0",
     "@remix-run/react": "^1.13.0",
     "@remix-run/serve": "^1.13.0",
     "@remix-run/server-runtime": "^1.13.0",
+    "daisyui": "^2.51.0",
     "isbot": "^3.6.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

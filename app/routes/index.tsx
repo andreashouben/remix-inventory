@@ -1,34 +1,24 @@
 import React from "react";
 import { Link, useLoaderData } from "@remix-run/react";
-import { Button } from "~/components/button/button";
+import { IconButton } from "~/components/button/iconButton";
 
 import { db } from "~/utils/db.server";
 
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Container as ContainerFromDb } from "@prisma/client";
-import { Container } from "~/components/container/container";
+import { FolderPlusIcon } from "@heroicons/react/20/solid";
+import { ContainerList } from "~/components/container/containerList";
+import { containerService } from "~/service/containerService";
 
 type LoaderData = {
-  containers: (ContainerFromDb & {
-    _count: { items: number; containers: number };
-  })[];
+  containers: Awaited<
+    ReturnType<typeof containerService.getContainersForParent>
+  >;
 };
 
 export const loader: LoaderFunction = async () => {
-  const containers = await db.container.findMany({
-    where: {
-      parentContainer: null,
-    },
-    include: {
-      _count: {
-        select: {
-          items: true,
-          containers: true,
-        },
-      },
-    },
-  });
+  const containers = await containerService.getContainersForParent(null);
 
   return json<LoaderData>({ containers });
 };
@@ -38,22 +28,19 @@ export default function Index() {
 
   return (
     <section>
-      <ol>
-        {containers.map((c) => (
-          <li key={c.id}>
-            <Container
-              key={c.id}
-              containerId={c.id}
-              containerName={c.name}
-              itemCount={c._count.items}
-              containerCount={c._count.containers}
-            />
-          </li>
-        ))}
-      </ol>
-      <Link to={"/container/add"}>
-        <Button>Add container</Button>
-      </Link>
+      <header className="flex items-center justify-between">
+        <h2>Your current inventory:</h2>
+        <div>
+          <Link to={`/container/add`}>
+            <IconButton label="Add Container">
+              <FolderPlusIcon />
+            </IconButton>
+          </Link>
+        </div>
+      </header>
+
+      <div className="pb-2 pt-2 text-sm">&nbsp;</div>
+      {containers.length > 0 && <ContainerList containers={containers} />}
     </section>
   );
 }

@@ -30,8 +30,9 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full bg-slate-50">
-        <main className="container mx-auto min-h-screen text-center">
-          <h1>Remix Inventory</h1>
+        <main className="container mx-auto ">
+          <h1 className="col-span-10 pt-3 pb-3 text-center">Remix Inventory</h1>
+
           <Outlet />
           <ScrollRestoration />
           <Scripts />
