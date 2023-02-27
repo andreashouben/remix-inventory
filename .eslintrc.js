@@ -3,7 +3,6 @@ module.exports = {
   extends: [
     "@remix-run/eslint-config",
     "@remix-run/eslint-config/node",
-    "@remix-run/eslint-config/jest-testing-library",
     "prettier",
   ],
   env: {},
@@ -15,4 +14,10 @@ module.exports = {
       version: 28,
     },
   },
+  overrides: [
+    {
+      files: "app/**/*.spec.ts[x]",
+      extends: ["@remix-run/eslint-config/jest-testing-library"],
+    },
+  ],
 };
