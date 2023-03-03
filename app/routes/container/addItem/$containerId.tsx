@@ -1,12 +1,10 @@
-import { Form, Outlet, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { containerService } from "~/service/containerService";
 import { db } from "~/utils/db.server";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { unitService } from "~/service/unitService";
-import type { KeyboardEvent } from "react";
-import { useEffect } from "react";
 
 type LoaderData = {
   container: Awaited<ReturnType<typeof containerService.getContainer>>;

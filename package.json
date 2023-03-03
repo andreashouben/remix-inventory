@@ -11,6 +11,7 @@
     "start": "remix-serve build",
     "test": "vitest --run",
     "test:watch": "vitest",
+    "test:playwright": "playwright test && playwright show-report",
     "typecheck": "tsc -b",
     "validate": "run-p test lint typecheck check"
   },
@@ -56,6 +57,7 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "happy-dom": "^6.0.4",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.18",

@@ -16,3 +16,10 @@ test("get started link", async ({ page }) => {
   // Expects the URL to contain intro.
   await expect(page).toHaveURL(/.*intro/);
 });
+
+test("test", async ({ page }) => {
+  await page.goto("http://localhost:3000/");
+  await page.getByRole("button", { name: "Add Container" }).click();
+  await page.getByPlaceholder("Container Name").fill("Haus");
+  await page.getByPlaceholder("Container Name").press("Enter");
+});

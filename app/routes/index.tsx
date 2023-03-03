@@ -2,11 +2,9 @@ import React from "react";
 import { Link, useLoaderData } from "@remix-run/react";
 import { IconButton } from "~/components/button/iconButton";
 
-import { db } from "~/utils/db.server";
 
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import type { Container as ContainerFromDb } from "@prisma/client";
 import { FolderPlusIcon } from "@heroicons/react/20/solid";
 import { ContainerList } from "~/components/container/containerList";
 import { containerService } from "~/service/containerService";
@@ -19,7 +17,6 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async () => {
   const containers = await containerService.getContainersForParent(null);
-
   return json<LoaderData>({ containers });
 };
 

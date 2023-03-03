@@ -1,13 +1,10 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { db } from "~/utils/db.server";
-import { Link, Outlet, useLoaderData, useNavigate } from "@remix-run/react";
+import { Link, useLoaderData, useNavigate } from "@remix-run/react";
 import type { Container as ContainerFromDb } from "@prisma/client";
-import { IconButton } from "~/components/button/iconButton";
 import { containerService } from "~/service/containerService";
 import React, { useEffect } from "react";
-import { ArchiveBoxArrowDownIcon } from "@heroicons/react/24/outline";
-import { FolderPlusIcon } from "@heroicons/react/20/solid";
 import { ContainerNavigation } from "~/components/containerNavigation/containerNavigation";
 import { ContainerList } from "~/components/container/containerList";
 import { ItemsTable } from "~/components/items/itemsTable";

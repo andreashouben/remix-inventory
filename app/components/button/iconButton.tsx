@@ -1,5 +1,4 @@
 import React from "react";
-import { an } from "vitest/dist/global-58e8e951";
 
 type ButtonProps = {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;

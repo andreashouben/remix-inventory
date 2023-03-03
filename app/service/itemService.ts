@@ -1,6 +1,4 @@
 import { db } from "~/utils/db.server";
-import { it } from "vitest";
-import { Item } from "@prisma/client";
 
 const updateItemObject = {
   async deleteItem(id: number) {

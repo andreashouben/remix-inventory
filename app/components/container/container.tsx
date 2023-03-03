@@ -1,13 +1,7 @@
 import { Form, Link } from "@remix-run/react";
 import { IconButton } from "~/components/button/iconButton";
 import React from "react";
-import {
-  FolderIcon,
-  FolderMinusIcon,
-  FolderOpenIcon,
-  FolderPlusIcon,
-} from "@heroicons/react/20/solid";
-import { ArchiveBoxArrowDownIcon } from "@heroicons/react/24/outline";
+import { FolderMinusIcon, FolderOpenIcon } from "@heroicons/react/20/solid";
 
 type ContainerProps = {
   containerName: string;

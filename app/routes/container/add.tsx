@@ -1,11 +1,6 @@
-import { Form } from "@remix-run/react";
-import { IconButton } from "~/components/button/iconButton";
 import type { ActionFunction } from "@remix-run/router";
 import { redirect } from "@remix-run/router";
 import { db } from "~/utils/db.server";
-import { Label } from "~/components/label/label";
-import { Input } from "~/components/input/input";
-import { CheckIcon } from "@heroicons/react/20/solid";
 import { SubmitForm } from "~/components/forms/submitForm";
 
 export const action: ActionFunction = async ({ request }) => {
